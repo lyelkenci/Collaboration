@@ -24,11 +24,22 @@ COPY --from=planner /app/recipe.json recipe.json
 ENV CARGO_BUILD_JOBS=4
 RUN cargo chef cook --release --recipe-path recipe.json
 
+#adding caching as chatgpt proposed
+# Cache dependencies first
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo fetch
+RUN cargo build --release --bin appflowy_cloud || true
+# end of the changes
+
 COPY . .
 ENV SQLX_OFFLINE true
 
 # Build the project
 RUN echo "Building with profile: ${PROFILE}, features: ${FEATURES}, "
+
+
+
 RUN cargo build --profile=${PROFILE} --features "${FEATURES}" --bin appflowy_cloud
 
 FROM debian:bookworm-slim AS runtime
