@@ -27,7 +27,8 @@ RUN cargo chef cook --release --recipe-path recipe.json
 #adding caching as chatgpt proposed
 # Cache dependencies first
 COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN mkdir -p src && printf 'fn main() {}\n' > src/main.rs
+
 RUN cargo fetch
 RUN cargo build --release --bin appflowy_cloud || true
 # end of the changes
